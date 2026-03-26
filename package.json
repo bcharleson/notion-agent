@@ -1,12 +1,12 @@
 {
-  "name": "@bcharleson/notion-cli",
+  "name": "notion-agent",
   "version": "0.1.0",
   "description": "Agent-native CLI + MCP server for the Notion API — wraps every Notion endpoint as a CLI command and MCP tool",
-  "keywords": ["notion", "cli", "mcp", "agent", "automation", "api"],
-  "homepage": "https://github.com/bcharleson/notion-cli#readme",
+  "keywords": ["notion", "cli", "mcp", "agent", "automation", "api", "notion-agent"],
+  "homepage": "https://github.com/bcharleson/notion-agent#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcharleson/notion-cli.git"
+    "url": "git+https://github.com/bcharleson/notion-agent.git"
   },
   "license": "MIT",
   "author": "Brandon Charleson <b.charleson@topoffunnel.com>",

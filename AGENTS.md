@@ -1,6 +1,6 @@
 # AGENTS.md — Notion CLI
 
-Agent discovery guide for `@bcharleson/notion-cli`. This tool wraps the entire Notion API as both a CLI and an MCP server.
+Agent discovery guide for `@bcharleson/notion-agent`. This tool wraps the entire Notion API as both a CLI and an MCP server.
 
 ---
 

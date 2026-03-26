@@ -1,4 +1,4 @@
-# @bcharleson/notion-cli
+# notion-agent
 
 Agent-native CLI + MCP server for the Notion API. Every Notion endpoint is a CLI command and an MCP tool — one integration, two interfaces, zero duplication.
 
@@ -9,13 +9,13 @@ Built for AI agents (OpenClaw, Claude, Cursor) and automation scripts that need 
 ## Install
 
 ```bash
-npm install -g @bcharleson/notion-cli
+npm install -g notion-agent
 ```
 
 Or run without installing:
 
 ```bash
-npx @bcharleson/notion-cli databases list
+npx notion-agent databases list
 ```
 
 ---
@@ -255,4 +255,4 @@ Notion enforces **3 requests/second** average per integration. The tool respects
 
 ## License
 
-MIT — [github.com/bcharleson/notion-cli](https://github.com/bcharleson/notion-cli)
+MIT — [github.com/bcharleson/notion-agent](https://github.com/bcharleson/notion-agent)
