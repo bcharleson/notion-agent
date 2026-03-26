@@ -1,0 +1,48 @@
+{
+  "name": "@bcharleson/notion-cli",
+  "version": "0.1.0",
+  "description": "Agent-native CLI + MCP server for the Notion API — wraps every Notion endpoint as a CLI command and MCP tool",
+  "keywords": ["notion", "cli", "mcp", "agent", "automation", "api"],
+  "homepage": "https://github.com/bcharleson/notion-cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcharleson/notion-cli.git"
+  },
+  "license": "MIT",
+  "author": "Brandon Charleson <b.charleson@topoffunnel.com>",
+  "type": "module",
+  "bin": {
+    "notion": "./dist/index.js",
+    "notion-mcp": "./dist/mcp.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./mcp": "./dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "AGENTS.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/index.ts",
+    "dev:mcp": "tsx src/mcp.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@notionhq/client": "^2.2.15",
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
