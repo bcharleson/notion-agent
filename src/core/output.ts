@@ -152,9 +152,21 @@ function normalizeDbTitles(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(normalizeDbTitles);
   if (typeof obj !== 'object' || obj === null) return obj;
   const record = obj as Record<string, unknown>;
+
+  // Database: title is a top-level rich_text array — flatten to string
   if (record.object === 'database' && Array.isArray(record.title)) {
     return { ...record, title: flattenRichText(record.title as RichTextArray) };
   }
+
+  // Page: title is buried in properties — find the property with type:"title" and surface it.
+  // The key name varies ("title", "Name", "Task", etc.) so we scan by type.
+  if (record.object === 'page' && typeof record.properties === 'object' && record.properties !== null) {
+    const props = record.properties as Record<string, PropertyValue>;
+    const titleProp = Object.values(props).find((p) => p.type === 'title');
+    const title = titleProp ? flattenRichText(titleProp.title ?? []) : '';
+    return { ...record, title };
+  }
+
   if (record.results && Array.isArray(record.results)) {
     return { ...record, results: record.results.map(normalizeDbTitles) };
   }
