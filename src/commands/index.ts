@@ -36,7 +36,9 @@ export function registerAllCommands(program: Command): void {
     if (!groups.has(cmd.group)) {
       const groupCmd = program
         .command(cmd.group)
-        .description(`Notion ${cmd.group} operations`);
+        .description(`Notion ${cmd.group} operations`)
+        // Show help with exit 0 when called with no subcommand (Friction #3)
+        .action(function () { this.help(); });
       groups.set(cmd.group, groupCmd);
     }
 
@@ -44,12 +46,22 @@ export function registerAllCommands(program: Command): void {
     const sub = groupCmd.command(cmd.subcommand).description(cmd.description);
 
     // Register options from cliMappings
+    // Track the first required *_id field so we can add --id as an alias
+    let primaryIdField: string | null = null;
     for (const opt of cmd.cliMappings.options ?? []) {
       if (opt.required) {
         sub.requiredOption(opt.flags, opt.description);
       } else {
         sub.option(opt.flags, opt.description);
       }
+      // Detect the primary ID option (first required option whose field ends in _id)
+      if (!primaryIdField && opt.required && opt.field.endsWith('_id')) {
+        primaryIdField = opt.field;
+      }
+    }
+    // Add --id as a shorthand alias for the primary ID field (Friction #4)
+    if (primaryIdField) {
+      sub.option('--id <id>', `Alias for --${primaryIdField.replace(/_/g, '-')}`);
     }
 
     // Register positional args from cliMappings
@@ -83,6 +95,10 @@ export function registerAllCommands(program: Command): void {
         const snakeKey = k.replace(/([A-Z])/g, '_$1').toLowerCase();
         input[snakeKey] = v;
         input[k] = v; // also keep camelCase in case schema uses it
+      }
+      // Map --id alias to the primary ID field if provided
+      if (opts.id && primaryIdField) {
+        input[primaryIdField] = opts.id;
       }
 
       // Handle positional args (all actionArgs except last two are positional)

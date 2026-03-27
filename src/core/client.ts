@@ -9,11 +9,17 @@ import { Client } from '@notionhq/client';
  */
 export class NotionClient {
   private notion: Client;
+  readonly token: string;
 
   constructor(token: string) {
+    this.token = token;
     this.notion = new Client({
       auth: token,
       notionVersion: '2022-06-28',
+      // Redirect SDK warnings to stderr so stdout stays clean JSON
+      logger: (level, message, extraInfo) => {
+        process.stderr.write(`@notionhq/client ${level}: ${message} ${JSON.stringify(extraInfo)}\n`);
+      },
     });
   }
 

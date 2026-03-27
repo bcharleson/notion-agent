@@ -117,12 +117,24 @@ function maybeFlatten(obj: unknown, flat: boolean): unknown {
   if (Array.isArray(obj)) return obj.map((item) => maybeFlatten(item, flat));
   if (typeof obj !== 'object' || obj === null) return obj;
   const record = obj as Record<string, unknown>;
+
+  // Flatten database objects: title is a rich_text array, normalize to a string (Friction #2)
+  if (record.object === 'database' && Array.isArray(record.title)) {
+    return {
+      ...record,
+      title: flattenRichText(record.title as RichTextArray),
+    };
+  }
+
+  // Flatten page objects: properties map
   if (record.properties && typeof record.properties === 'object') {
     return {
       ...record,
       properties: flattenProperties(record.properties as Record<string, PropertyValue>),
     };
   }
+
+  // Recurse into paginated result sets
   if (record.results && Array.isArray(record.results)) {
     return {
       ...record,

@@ -35,7 +35,7 @@ export function resolveToken(flagToken?: string): string {
   if (!token) {
     console.error(
       'Error: No Notion token found.\n' +
-        'Set NOTION_TOKEN env var, use --token flag, or run: notion workspace login'
+        'Set NOTION_TOKEN env var, use --token flag, or run: notion login'
     );
     process.exit(1);
   }

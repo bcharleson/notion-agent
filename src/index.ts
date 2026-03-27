@@ -1,12 +1,19 @@
 import { Command } from 'commander';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
+import { createInterface } from 'readline';
 import { registerAllCommands } from './commands/index.js';
 import { saveConfig, resolveToken } from './core/config.js';
 import { NotionClient } from './core/client.js';
 import { printResult } from './core/output.js';
+
+function prompt(question: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stderr });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => { rl.close(); resolve(answer.trim()); });
+  });
+}
 
 // Read version from package.json
 let version = '0.1.0';
@@ -37,12 +44,20 @@ program
   .description('Save your Notion integration token to ~/.notion-cli/config.json')
   .option('--token <token>', 'Token to save (or set NOTION_TOKEN env var)')
   .action(async (opts: { token?: string }) => {
-    const token = opts.token ?? process.env.NOTION_TOKEN;
+    let token = opts.token ?? process.env.NOTION_TOKEN;
+
+    // Interactive prompt when no token provided
     if (!token) {
-      console.error('Usage: notion login --token secret_xxxx');
-      console.error('Or set NOTION_TOKEN environment variable');
+      process.stderr.write('Paste your Notion integration token (secret_... or ntn_...):\n');
+      token = await prompt('Token: ');
+    }
+
+    if (!token) {
+      console.error('Usage: notion login --token <token>');
+      console.error('Tokens start with secret_ or ntn_');
       process.exit(1);
     }
+
     // Verify the token works
     try {
       const client = new NotionClient(token);

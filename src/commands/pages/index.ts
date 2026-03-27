@@ -223,13 +223,12 @@ export const pageCommands: CommandDefinition[] = [
       ],
     },
     handler: async (input, client) => {
-      // Use the raw fetch endpoint for Markdown (not in @notionhq/client SDK yet)
-      const token = (client as unknown as { notion: { auth: string } }).notion?.auth;
+      // Use raw fetch — Markdown endpoint not yet in @notionhq/client SDK
       const res = await fetch(
         `https://api.notion.com/v1/pages/${input.page_id as string}/markdown`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${client.token}`,
             'Notion-Version': '2022-06-28',
           },
         }
