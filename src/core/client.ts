@@ -16,10 +16,10 @@ export class NotionClient {
     this.notion = new Client({
       auth: token,
       notionVersion: '2022-06-28',
-      // Redirect SDK warnings to stderr so stdout stays clean JSON
-      logger: (level, message, extraInfo) => {
-        process.stderr.write(`@notionhq/client ${level}: ${message} ${JSON.stringify(extraInfo)}\n`);
-      },
+      // Suppress all SDK logging — errors are captured by our own error handler.
+      // The SDK uses console[level] internally; console.info goes to stdout which
+      // breaks JSON piping. A no-op logger prevents any SDK output on any level.
+      logger: () => {},
     });
   }
 

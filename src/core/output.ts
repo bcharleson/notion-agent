@@ -144,10 +144,28 @@ function maybeFlatten(obj: unknown, flat: boolean): unknown {
   return obj;
 }
 
+/**
+ * Normalize database titles unconditionally — always convert rich_text array to string.
+ * This runs on every response, not just --flat, because raw rich_text is never useful output.
+ */
+function normalizeDbTitles(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(normalizeDbTitles);
+  if (typeof obj !== 'object' || obj === null) return obj;
+  const record = obj as Record<string, unknown>;
+  if (record.object === 'database' && Array.isArray(record.title)) {
+    return { ...record, title: flattenRichText(record.title as RichTextArray) };
+  }
+  if (record.results && Array.isArray(record.results)) {
+    return { ...record, results: record.results.map(normalizeDbTitles) };
+  }
+  return obj;
+}
+
 export function printResult(result: unknown, opts: GlobalOptions): void {
   if (opts.quiet) return;
 
-  let output = result;
+  // Always normalize database titles (rich_text array → string)
+  let output = normalizeDbTitles(result);
 
   if (opts.flat) output = maybeFlatten(output, true);
 

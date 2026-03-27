@@ -45,23 +45,26 @@ export function registerAllCommands(program: Command): void {
     const groupCmd = groups.get(cmd.group)!;
     const sub = groupCmd.command(cmd.subcommand).description(cmd.description);
 
-    // Register options from cliMappings
-    // Track the first required *_id field so we can add --id as an alias
+    // Register options from cliMappings.
+    // The primary ID field (first required *_id option) is demoted to optional so that
+    // --id can satisfy it — Commander validates requiredOption before the action runs,
+    // which would block --id from ever being used. We validate presence manually below.
     let primaryIdField: string | null = null;
     for (const opt of cmd.cliMappings.options ?? []) {
-      if (opt.required) {
+      const isPrimaryId = !primaryIdField && opt.required && opt.field.endsWith('_id');
+      if (isPrimaryId) primaryIdField = opt.field;
+
+      if (opt.required && !isPrimaryId) {
+        // Non-ID required options stay as requiredOption
         sub.requiredOption(opt.flags, opt.description);
       } else {
         sub.option(opt.flags, opt.description);
       }
-      // Detect the primary ID option (first required option whose field ends in _id)
-      if (!primaryIdField && opt.required && opt.field.endsWith('_id')) {
-        primaryIdField = opt.field;
-      }
     }
     // Add --id as a shorthand alias for the primary ID field (Friction #4)
     if (primaryIdField) {
-      sub.option('--id <id>', `Alias for --${primaryIdField.replace(/_/g, '-')}`);
+      const flagName = primaryIdField.replace(/_/g, '-');
+      sub.option('--id <id>', `Alias for --${flagName}`);
     }
 
     // Register positional args from cliMappings
@@ -96,9 +99,16 @@ export function registerAllCommands(program: Command): void {
         input[snakeKey] = v;
         input[k] = v; // also keep camelCase in case schema uses it
       }
-      // Map --id alias to the primary ID field if provided
+      // Map --id alias → primary ID field (must happen before validation)
       if (opts.id && primaryIdField) {
         input[primaryIdField] = opts.id;
+      }
+
+      // Validate primary ID field is present (replaces Commander's requiredOption check)
+      if (primaryIdField && !input[primaryIdField]) {
+        const flagName = primaryIdField.replace(/_/g, '-');
+        console.error(JSON.stringify({ error: `Missing required option: --${flagName} (or --id)` }));
+        process.exit(1);
       }
 
       // Handle positional args (all actionArgs except last two are positional)
