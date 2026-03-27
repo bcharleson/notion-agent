@@ -1,8 +1,11 @@
 # notion-agent
 
+[![npm version](https://img.shields.io/npm/v/notion-agent.svg)](https://www.npmjs.com/package/notion-agent)
+[![license](https://img.shields.io/npm/l/notion-agent.svg)](LICENSE)
+
 Agent-native CLI + MCP server for the Notion API. Every Notion endpoint is a CLI command and an MCP tool — one integration, two interfaces, zero duplication.
 
-Built for AI agents (OpenClaw, Claude, Cursor) and automation scripts that need to read, write, and query Notion workspaces.
+Built for AI agents (Claude, Cursor, OpenClaw) and automation scripts that need to read, write, and query Notion workspaces programmatically.
 
 ---
 
@@ -24,22 +27,25 @@ npx notion-agent databases list
 
 You need a Notion integration token. Create one at [notion.so/my-integrations](https://www.notion.so/my-integrations).
 
+> **Token format:** Tokens start with `secret_` (older integrations) or `ntn_` (newer integrations). Both are supported.
+
 **Option 1 — Environment variable (recommended for CI/agents):**
 ```bash
-export NOTION_TOKEN=secret_xxxxxxxxxxxx
+export NOTION_TOKEN=ntn_xxxxxxxxxxxx
 ```
 
-**Option 2 — Login command (saves to `~/.notion-cli/config.json`):**
+**Option 2 — Interactive login (saves to `~/.notion-cli/config.json`):**
 ```bash
-notion login --token secret_xxxxxxxxxxxx
+notion login
+# Prompts: Paste your Notion integration token (secret_... or ntn_...):
 ```
 
 **Option 3 — Per-command flag:**
 ```bash
-notion --token secret_xxxxxxxxxxxx databases list
+notion --token ntn_xxxxxxxxxxxx databases list
 ```
 
-> **Important:** Your integration only sees pages and databases that have been explicitly shared with it. In Notion, open a page/database → Share → Invite your integration.
+> **Important:** Your integration only sees pages and databases that have been explicitly shared with it. In Notion, open a page/database → **Share** → **Invite** → search for your integration name.
 
 ---
 
@@ -215,16 +221,21 @@ Use as an MCP server with Claude Code, Claude Desktop, Cursor, or any MCP client
 ### Claude Code
 
 ```bash
-claude mcp add notion -- node /path/to/notion-mcp
-# Or if installed globally:
+# Install globally first
+npm install -g notion-agent
+
+# Add as MCP server
 claude mcp add notion -- notion-mcp
 ```
 
-Set `NOTION_TOKEN` in your environment before starting Claude Code.
+Set `NOTION_TOKEN` in your environment before starting Claude Code, or pass it inline:
+```bash
+NOTION_TOKEN=ntn_xxx claude
+```
 
 ### Claude Desktop
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
@@ -232,11 +243,35 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
     "notion": {
       "command": "notion-mcp",
       "env": {
-        "NOTION_TOKEN": "secret_xxxxxxxxxxxx"
+        "NOTION_TOKEN": "ntn_xxxxxxxxxxxx"
       }
     }
   }
 }
+```
+
+### Cursor
+
+Add to your Cursor MCP settings (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "notion": {
+      "command": "notion-mcp",
+      "env": {
+        "NOTION_TOKEN": "ntn_xxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+### Any MCP Client
+
+The MCP server runs on stdio. Start it with:
+```bash
+NOTION_TOKEN=ntn_xxx notion-mcp
 ```
 
 ### Available MCP Tools
@@ -249,7 +284,23 @@ All 29 commands are available as MCP tools with the naming convention `<group>_<
 
 ## Rate Limits
 
-Notion enforces **3 requests/second** average per integration. The tool respects this by catching `429` errors — if you hit rate limits, add delays between bulk operations.
+Notion enforces **3 requests/second** average per integration. The tool respects this — if you hit rate limits (`429` errors), add delays between bulk operations.
+
+---
+
+## Contributing
+
+Issues and PRs welcome at [github.com/bcharleson/notion-agent](https://github.com/bcharleson/notion-agent).
+
+```bash
+git clone https://github.com/bcharleson/notion-agent.git
+cd notion-agent
+npm install
+npm run dev -- databases list --help   # run CLI in dev mode
+npm run dev:mcp                         # run MCP server in dev mode
+npm run build                           # compile to dist/
+npm run typecheck                       # TypeScript check without build
+```
 
 ---
 

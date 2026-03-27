@@ -1,6 +1,6 @@
 {
   "name": "notion-agent",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Agent-native CLI + MCP server for the Notion API — wraps every Notion endpoint as a CLI command and MCP tool",
   "keywords": [
     "notion",

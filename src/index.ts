@@ -66,6 +66,7 @@ program
       const workspaceName = (me as Record<string, unknown>).bot
         ? (((me as Record<string, unknown>).bot as Record<string, unknown>).workspace_name as string)
         : 'unknown';
+      process.stderr.write('\n');
       console.log(JSON.stringify({ authenticated: true, workspace: workspaceName, bot: me.name }));
     } catch {
       console.error(JSON.stringify({ error: 'Invalid token — authentication failed' }));
